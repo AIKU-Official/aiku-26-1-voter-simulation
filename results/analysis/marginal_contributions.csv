@@ -1,0 +1,5 @@
+﻿metric,C_L3_mae,C_base_mae,C_bns_mae,C_pv_mae,C_full_mae,orient_contrib_pp,bns_contrib_pp,pv_contrib_pp,bns_pv_contrib_pp
+Nation,33.32,12.26,9.43,11.87,9.26,21.06,2.83,0.39,3.0
+Sido,32.01,12.87,11.12,12.94,11.34,19.14,1.75,-0.06,1.53
+Age,31.32,12.11,11.05,11.77,10.33,19.21,1.05,0.34,1.78
+Sex,31.73,10.58,7.77,10.18,7.6,21.14,2.81,0.4,2.99

@@ -1,0 +1,5 @@
+candidate_no,name_ko,pdf_path,sha256,size_bytes,text_path,text_chars,text_pages,parsed_at,status
+1,이재명,candidates/raw_pdfs/1_이재명.pdf,41ef22664362d3ce50b20cc3027d090426588ce9ded25f51acfafef07f6f517e,207556,candidates/text/1_이재명.txt,13215,20,2026-05-07T05:01:36.732268+00:00,ok
+2,김문수,candidates/raw_pdfs/2_김문수.pdf,1176783b928f99d845fd168bbb39220e2aeaa30c3467b9f7837d11a54da1b176,240429,candidates/text/2_김문수.txt,12527,19,2026-05-07T05:01:37.368673+00:00,ok
+4,이준석,candidates/raw_pdfs/4_이준석.pdf,9b4d927bc8e7c876b4ddf29899ab3ddaf9e68fe8204589bbe19bd345503c0f0e,134754,candidates/text/4_이준석.txt,8594,11,2026-05-07T05:01:37.876164+00:00,ok
+5,권영국,candidates/raw_pdfs/5_권영국.pdf,0c6414aab5648ddc455efc376ef1a5ee98c911839743492db6d1731c9b8110fb,231755,candidates/text/5_권영국.txt,14054,19,2026-05-07T05:01:38.167586+00:00,ok

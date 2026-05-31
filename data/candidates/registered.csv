@@ -1,0 +1,5 @@
+candidate_no,name_ko,party,final_vote_share_pct,final_votes,policy_pdf_path,policy_text_path,source,retrieved_at,notes
+1,이재명,더불어민주당,49.42,17287513,data/candidates/raw_pdfs/1_이재명.pdf,data/candidates/text/1_이재명.txt,Wikipedia (ko/en) citing NEC 후보자등록현황,2026-05-06,당선
+2,김문수,국민의힘,41.15,14395639,data/candidates/raw_pdfs/2_김문수.pdf,data/candidates/text/2_김문수.txt,Wikipedia (ko/en) citing NEC 후보자등록현황,2026-05-06,
+4,이준석,개혁신당,8.34,2917523,data/candidates/raw_pdfs/4_이준석.pdf,data/candidates/text/4_이준석.txt,Wikipedia (ko/en) citing NEC 후보자등록현황,2026-05-06,
+5,권영국,민주노동당,0.98,344150,data/candidates/raw_pdfs/5_권영국.pdf,data/candidates/text/5_권영국.txt,Wikipedia (ko/en) citing NEC 후보자등록현황,2026-05-06,

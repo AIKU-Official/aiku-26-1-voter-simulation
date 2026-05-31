@@ -1,0 +1,45 @@
+# User Prompt Instructions — C_L3 (V1 Replication)
+
+Used ONLY in C_L3. Replicates V1 L3 setup exactly. No thinking tag, no mitigation #4.
+
+## Position in User Prompt
+
+Same structure as main, but instruction block is simpler:
+```
+[Election context]
+[Candidate info — V1 L3 동일]
+[당신은 {agent_sido}에 거주하는 유권자입니다.]
+[Below: this file's content]
+```
+
+## Instructions Text (V1 그대로)
+
+```
+다음 두 질문에 답해주세요.
+1. 투표하시겠습니까? (예 / 아니오)
+2. 투표한다면 어느 후보를 선택하시겠습니까?
+
+응답은 다음 JSON 형식으로만 작성하세요.
+
+{"will_vote": true, "candidate": "이재명", "reasoning_brief": "한 문장 이유"}
+
+- will_vote: 투표 의향이 있으면 true, 없으면 false.
+- candidate: 후보자 한국어 이름. 투표하지 않으면 빈 문자열 "".
+- reasoning_brief: 본인이 그렇게 결정한 핵심 이유를 한 문장으로.
+```
+
+## Notes
+
+- C_L3 is the V1 L3 replication baseline. Must match V1 setup verbatim for proper comparison.
+- No `<thinking>` tag — reasoning is post-hoc (in `reasoning_brief` field, after `candidate` decision).
+- No mitigation #4 voting principle — V1 had no orientation-consistency instruction.
+- No `enable_thinking` flag for Qwen3 — set to `False` for C_L3 to match V1.
+- This means C_L3 captures "V1 sans bias mitigation but with name+symmetric pledges + Nemotron narrative" — which is the V1 L3 baseline configuration.
+
+## Expected Output Format
+
+```
+{"will_vote": true, "candidate": "이재명", "reasoning_brief": "분배 정책을 강조하는 점이 본인 가치관과 일치하므로"}
+```
+
+No `<thinking>` block. Reasoning post-hoc in `reasoning_brief` field.

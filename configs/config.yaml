@@ -1,0 +1,155 @@
+# v3 config. The 2025 presidential election validation track.
+# v1 main.yaml/pilot.yaml were removed; this is the v3 baseline.
+seed: 42
+n_personas: 5000
+
+efa:
+  # Decision pause (Option A, JADE 2026-05-25): the 42 backbone items are split
+  # across non-overlapping KGSS waves — the 2016 political-attitudes module and
+  # the 2010 immigration module share ZERO respondents, so a pooled 42-item EFA
+  # is unidentifiable (see data/kgss/efa_coverage_diagnostic.json). We therefore
+  # run a SINGLE-WAVE EFA on 2016 (17 items, n=1051) and DROP F4 immigration.
+  wave: 2016
+  na_thresh_frac: 0.30   # drop respondents missing >30% of the wave's items
+  rotation: varimax      # Promax produced as supplementary for the T2.8 comparison
+  loading_cutoff: 0.40
+  pa_iter: 100           # parallel-analysis random replicates
+
+  # T2.8 CONFIRMED (JADE 2026-05-25):
+  n_factors: 4
+  # 5 items load <0.40 on every factor → DROPPED (note in paper limitations).
+  drop_items: [CNSRVTV4, CNSRVTV6, CNSRVTV8, CNSRVTV10, GOVRES11]
+  # Final 4 factors, identified by signature items (robust to factor-analyzer
+  # ordering). `political: false` → excluded from the 보수/진보 BNS mapping.
+  # Direction: every substantive item recodes so HIGH=진보, so factors are
+  # flipped to put 보수 (정치) / 신뢰 (효능감) at the POSITIVE score pole.
+  factor_identities:
+    - {name: "경제·재분배(정부책임)", signature: [GOVRES1, GOVRES6, GOVRES7, GOVRES8], positive_label: "보수(반재분배)", political: true}
+    - {name: "대북·안보",            signature: [CNSRVTV1, CNSRVTV2, CNSRVTV3, CNSRVTV9], positive_label: "보수(안보강경)", political: true}
+    - {name: "시장·민영화",          signature: [CNSRVTV7, CNSRVTV5], positive_label: "보수(시장자율)", political: true}
+    - {name: "정치효능감(신뢰/냉소)", signature: [POLEFF5, POLEFF6], positive_label: "신뢰", political: false}
+
+paths:
+  # Read-only mirror of NVIDIA Nemotron-Personas-Korea (9 parquet shards, 1M rows).
+  nvidia_data_glob: /workspace/Personas/nvidia-data/data/train-*.parquet
+  personas_dir: data/personas
+  ground_truth_dir: data/ground_truth
+  candidates_dir: data/candidates
+  # KGSS cumulative file 2003-2025 (CUM0074 V2, SPSS). English-labeled.
+  kgss_sav: data/kgss/eng_data_CUM0074_V2.sav
+  # HF cache on the /workspace volume (4.4TB free); root overlay is full.
+  hf_home: /workspace/.cache/huggingface
+
+orientation:
+  # KGSS native 5-point PARTYLR (1 매우진보 .. 5 매우보수), FINALWT-weighted,
+  # conditioned on sex × age-bucket × region(7) × education, with a fallback
+  # chain for thin cells. All 16 waves used for the conditional structure;
+  # the marginal is corrected to Gallup 2025 levels downstream (§8.3).
+  partylr_var: PARTYLR
+  weight_var: FINALWT
+  min_cell_n: 5          # raw KGSS respondents in a cell; below → fall back coarser
+  recency_half_life_years: 8   # exp decay toward election year; recent waves dominate
+                               # the conditional (all waves kept for cell support).
+  gallup_target:         # 3-way marginal calibration target (보수/중도/진보)
+    진보: 0.26
+    중도: 0.48
+    보수: 0.26
+
+election:
+  # 21st Republic of Korea presidential election (조기대선)
+  date: 2025-06-03
+  age_buckets: ["19-29", "30-39", "40-49", "50-59", "60-69", "70+"]
+
+sampling:
+  # uniform = person-level uniform random (proposal §8.1 default).
+  # sido reweighting is deferred to Decision pause #3 after inspecting the
+  # sampled sido distribution against voter-age population weights.
+  strategy: uniform
+
+swap:
+  # T1.3 (JADE 2026-05-25). EXAONE judge found Nemotron narratives are largely
+  # apolitical (lean: M 76% / C 15% / P 8%; M = "정치 신호 부재"), so genuine
+  # narrative↔orientation conflict is rare. Two refinements vs the spec's B-2:
+  #  (1) swap is constrained to (sido × sex × age_bucket) cells, not sido-only —
+  #      a sido-only swap would distort the sex×orientation / age×orientation
+  #      joints that orientation was conditioned on and that Level 3/4 eval needs.
+  #  (2) stricter conflict: M (and ambiguous) treated as no-signal (skipped);
+  #      a conflict needs opposite sides (dist>=2) AND judge confidence>=4
+  #      (weak conf-3 cultural cues like 인디음악→p are not enough to override census).
+  group_cols: [sido17, sex_label, age_bucket]
+  conflict_distance: 2
+  min_confidence: 4
+  signal_leans: [c, p]      # m / ambiguous = no political signal → never a conflict
+
+model:
+  # Primary = Qwen3-30B-A3B (MoE, 3B active). Chosen over the proposal's 8B
+  # (R2) to match Dynamo-K's exact model, removing model-choice confound from
+  # the C1 baseline comparison. Weights from the 2025-04-28/30 release predate
+  # the election → pre-election cutoff holds (docs/model_cutoff.md, 30B addendum).
+  name: Qwen/Qwen3-30B-A3B
+  revision: f0abbbee7f   # 2025-05-19 update tokenizer_config.json (last weight-stable pre-LICENSE)
+  dtype: bfloat16
+  device_map: auto       # ~61GB → shard across 2-3 A6000s
+  enable_thinking: false # suppress Qwen3 <think> blocks (v1 lesson)
+
+persona_vector:
+  # VERIFIED model architecture (config.json, rev f0abbbee7f): Qwen3-30B-A3B is
+  # qwen3_moe, num_hidden_layers=48, hidden_size=2048 (PV vectors are 2048-dim),
+  # 128 experts / 8 active. output_hidden_states gives 49 tensors (0=embeddings,
+  # 1..48=layer outputs); probing "layer L" uses hidden_states[L].
+  # probe_layers: 8 layers spread across depth (skip L0 embeddings, L48 final):
+  #   early/lexical 6,12 · mid/concept 18,24,30,36 · late 42,46. Separation is
+  #   computed for all 8 from one forward pass (cheap); expensive causal/mvm run
+  #   on the top separation candidates only.
+  probe_layers: [6, 12, 18, 24, 30, 36, 42, 46]
+  # SELECTED layer 36 (JADE 2026-05-25). Re-derived on Qwen3-30B-A3B by separation
+  # score (Metric 1): L36 top (21.9), mid-late layers 30-42 strongest; causal/mvm
+  # skipped by JADE decision. Prior layer-32 (Qwen3-8B) discarded. v_*_layer36.npy.
+  selected_layer: 36
+  rollouts: 10
+  max_new_tokens: 100
+  # device_map=auto is pipeline-parallel (1 GPU active at a time) → push many
+  # sequences/forward to use the idle ~38GB/GPU. gen_batch prompts × rollouts
+  # sequences per generate. 16×10=160 seqs/chunk; raise if memory allows.
+  gen_batch: 16
+  alpha_sweep: [0.5, 1.0, 1.5, 2.0, 2.5, 3.0]
+  alpha_tuning:
+    # T2.10 — select ALPHA_PLAIN/STRONG by sweeping coeff on a validation subset.
+    # Inject at selected_layer: 보수/진보 → ±α·v_보수, 매우보수/매우진보 → ±1.5α
+    # (ALPHA_STRONG = 1.5·ALPHA_PLAIN), 중도 → 0. Pick the largest α keeping JSON
+    # parse rate > 0.95 while maximizing orientation-vote consistency. Range
+    # extended past the proposal's {0.5..3.0} toward the causal-effective band
+    # (T2.5 found raw-v multiples of ~4-8 needed for strong steering).
+    subset_per_orientation: 50   # stratified; 5 orientations → ~250 agents
+    k: 1                         # rollouts per agent (sweep speed; main run uses 5)
+    max_new_tokens: 256
+    level: L3                    # v1 used L3 (full narrative)
+    alphas: [0.0, 1.0, 2.0, 3.0, 4.0, 6.0]
+    # Prompt ablation knobs (diagnosing the 이재명 collapse):
+    #   include_policy=False → candidate block is name+party only (no policy dump)
+    #   vote_instruction=True → add "보수면 보수후보 선호" reinforcement
+    include_policy: false
+    vote_instruction: true
+    # gen_batch can be larger without the ~8k-token policy block; keep modest.
+    gen_batch: 8
+  causal:
+    # T2.5 causal-effect probing (§9.1.3 Metric 2). Add coeff · v_보수[L] to the
+    # residual stream (hook on model.model.layers[L-1], whose output == the
+    # hidden_states[L] the vector was extracted from). +coeff boosts 보수,
+    # −coeff boosts 진보. Generate on 20 HELD-OUT questions (disjoint from the
+    # 50), self-judge 보수-ness 1-5. Effect = Δ(보수 score) vs unsteered baseline.
+    judge: self
+    rollouts: 3              # responses per (question × coeff)
+    coeffs: [-8, -4, 0, 4, 8]   # × raw diff-in-means vector v_보수[L]
+    layers: [24, 32, 40]    # top T2.3 candidates to confirm causally
+  trait_validation:
+    judge: exaone          # EXAONE 4.0 32B, cross-model (JADE 2026-05-25). No API.
+    rollouts: 5            # Qwen3-30B forced responses per prompt per direction
+    # EXAONE cross-judges each response on BOTH axes (보수성 1-5, 진보성 1-5).
+    # RELATIVE separation (primary): a prompt passes if forced-보수 responses
+    # out-score forced-진보 on the 보수 axis by ≥ sep_margin AND forced-진보
+    # out-score forced-보수 on the 진보 axis by ≥ sep_margin (prompts elicit
+    # *distinguishable* traits — the real requirement for a clean contrast vector).
+    # Absolute (rubric: consistency/strength≥3.5) also reported for reference.
+    sep_margin: 0.5        # min mean gap on the 1-5 scale (5-rollout average)
+    min_pass_per_set: 35   # ≥35/50 prompts must separate, else escalate

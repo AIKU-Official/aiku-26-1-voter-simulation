@@ -1,0 +1,98 @@
+{
+  "n_original": 1051,
+  "n_clean": 1047,
+  "kmo_model": 0.6869711496760529,
+  "bartlett_p": 8.782296617147132e-285,
+  "pa_n_factors": 4,
+  "kaiser_n_factors": 4,
+  "n_factors_used": 4,
+  "variance_explained": 0.36339949075764777,
+  "n_cross_loading_items": 0,
+  "dropped_items": [
+    "CNSRVTV4",
+    "CNSRVTV6",
+    "CNSRVTV8",
+    "CNSRVTV10",
+    "GOVRES11"
+  ],
+  "none_items": [
+    "CNSRVTV5"
+  ],
+  "factors": [
+    {
+      "empirical_factor": "F1",
+      "name": "경제·재분배(정부책임)",
+      "political": true,
+      "positive_label": "보수(반재분배)",
+      "mean_signature_loading_raw": 0.586,
+      "flipped": true
+    },
+    {
+      "empirical_factor": "F2",
+      "name": "대북·안보",
+      "political": true,
+      "positive_label": "보수(안보강경)",
+      "mean_signature_loading_raw": 0.484,
+      "flipped": true
+    },
+    {
+      "empirical_factor": "F3",
+      "name": "정치효능감(신뢰/냉소)",
+      "political": false,
+      "positive_label": "신뢰",
+      "mean_signature_loading_raw": 0.696,
+      "flipped": true
+    },
+    {
+      "empirical_factor": "F4",
+      "name": "시장·민영화",
+      "political": true,
+      "positive_label": "보수(시장자율)",
+      "mean_signature_loading_raw": 0.542,
+      "flipped": true
+    }
+  ],
+  "tbd_recommendations": [
+    {
+      "item": "POLEFF5",
+      "assigned_factor": "정치효능감(신뢰/냉소)",
+      "loading": -0.59,
+      "sign_agrees_with_peers": true,
+      "recommendation": "keep as-is"
+    },
+    {
+      "item": "POLEFF6",
+      "assigned_factor": "정치효능감(신뢰/냉소)",
+      "loading": -0.81,
+      "sign_agrees_with_peers": true,
+      "recommendation": "keep as-is"
+    }
+  ],
+  "sparsity": {
+    "n_respondents_grouped": 1009,
+    "n_distinct_full_cells": 208,
+    "n_primary_cells_ge_min": 33,
+    "min_cell_size": 10,
+    "respondents_in_usable_primary": 458,
+    "pct_in_usable_primary": 45.4,
+    "mean_n_per_full_cell": 4.9,
+    "mean_n_per_region_orient": 40.4,
+    "n_region_orient_cells": 25,
+    "orient_pool_sizes": {
+      "C": 263,
+      "M": 379,
+      "P": 283,
+      "VC": 47,
+      "VP": 37
+    }
+  },
+  "resampling": {
+    "projected_n_agents": 5000,
+    "projected_unique_respondents_used": 1003,
+    "total_pool_respondents": 1009,
+    "max_single_respondent_reuse": 12,
+    "note": "orientation-only fallback projection (upper bound on re-use)"
+  },
+  "wave": 2016,
+  "elapsed_sec": 16.4
+}

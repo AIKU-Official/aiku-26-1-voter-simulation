@@ -1,0 +1,58 @@
+# User Prompt Instructions — Main (C_base, C_bns, C_pv, C_full)
+
+Used in conditions C_base, C_bns, C_pv, C_full. NOT used in C_L3 (V1 그대로).
+
+## Position in User Prompt
+
+User prompt full structure:
+```
+[Election context: 2025 대선 헤더]
+
+[Candidate info — V1 L3 차용 from candidate_info.txt]
+
+[당신은 {agent_sido}에 거주하는 유권자입니다.]
+
+[Below: this file's content]
+```
+
+## Instructions Text
+
+```
+다음 두 질문에 답해주세요.
+1. 투표하시겠습니까? (예 / 아니오)
+2. 투표한다면 어느 후보를 선택하시겠습니까?
+
+투표 결정 절차:
+1. <thinking> 태그 안에서 본인의 정치 성향·가치관·생활 환경에 비추어 각 후보의 정책을 검토하세요 (3-5 문장).
+2. </thinking> 태그 후 최종 결정을 JSON으로 작성하세요.
+
+투표 시 다음 원칙을 따르세요:
+- 강한 진보/보수 성향(VP/VC)이면 진영 후보를 강하게 선호합니다.
+- 진보 또는 보수 성향(P/C)이면 진영 후보를 우선 고려하되, 후보 자질이나 정책 매력에 따라 다른 진영을 선택할 수도 있습니다 (실제 한국 유권자의 진영 이탈률은 약 10-20%).
+- 중도 성향이면 양쪽 후보를 공정하게 비교한 후 결정합니다.
+
+응답 형식:
+
+<thinking>
+(3-5문장의 추론)
+</thinking>
+
+{"will_vote": true, "candidate": "1번 후보", "reasoning_brief": "한 문장 결정 핵심"}
+
+응답은 위 형식으로만 작성하세요. 다른 설명·서론·결론은 덧붙이지 마세요.
+```
+
+## Notes
+
+- Mitigation #4 (orientation-consistent voting) embedded in "투표 시 다음 원칙을 따르세요" block.
+- `<thinking>` is the manual tag chosen for (II) Manual thinking mode (default).
+- For (I) Native thinking mode (Qwen3 `enable_thinking=True`) — if throughput allows — model auto-generates `<think>...</think>` and we replace this entire `<thinking>...</thinking>` instruction block with just the JSON template (no thinking instruction needed; model does it natively).
+
+## Thinking Mode Notes
+
+| Mode | Implementation | Token cost | Quality |
+|---|---|---|---|
+| (II) Manual default | This wording, `enable_thinking=False` | +50% | Medium |
+| (I) Native upgrade | `enable_thinking=True`, simplify this block | +100-500% | High |
+
+Throughput / pilot review determines the default.

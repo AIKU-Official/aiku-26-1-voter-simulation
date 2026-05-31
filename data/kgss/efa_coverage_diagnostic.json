@@ -1,0 +1,59 @@
+{
+  "problem": "42 backbone items are split across non-overlapping KGSS waves; no respondent answered items from both the 2016 political module and the 2010 immigration module, so a single pooled 42-item EFA is unidentifiable.",
+  "complete_cases_all_42": 0,
+  "max_items_any_respondent": 17,
+  "modules": {
+    "2016_political": {
+      "items": [
+        "CNSRVTV4",
+        "CNSRVTV6",
+        "CNSRVTV7",
+        "GOVRES1",
+        "GOVRES6",
+        "GOVRES7",
+        "GOVRES8",
+        "CNSRVTV1",
+        "CNSRVTV2",
+        "CNSRVTV3",
+        "CNSRVTV9",
+        "CNSRVTV8",
+        "CNSRVTV10",
+        "GOVRES11",
+        "CNSRVTV5",
+        "POLEFF5",
+        "POLEFF6"
+      ],
+      "factors_covered": [
+        "F1",
+        "F2",
+        "F3",
+        "F5",
+        "F6"
+      ],
+      "complete_case_n": 1012
+    },
+    "2010_immigration": {
+      "items": [
+        "FPOLICY1",
+        "FPOLICY2",
+        "FPOLICY3",
+        "FPOLICY4",
+        "FPOLICY5",
+        "FPOLICY6",
+        "FPOLICY7",
+        "IMMGFILL",
+        "IMMHRMPR",
+        "IMMLWPRD",
+        "IMMCNFLT",
+        "MOREPOP",
+        "POLGREED"
+      ],
+      "factors_covered": [
+        "F4",
+        "F6"
+      ],
+      "complete_case_n": 1479
+    }
+  },
+  "F4_immigration_cooccurrence_with_political": 0
+}

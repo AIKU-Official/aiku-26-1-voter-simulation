@@ -1,0 +1,17 @@
+{
+  "selected_layer": 36,
+  "hidden_size": 2048,
+  "selection_method": "separation score (Metric 1) only; causal/mvm skipped (JADE 2026-05-25)",
+  "separation_at_36": 21.898,
+  "v_conservative_path": "data/persona_vectors/v_conservative_layer36.npy",
+  "v_progressive_path": "data/persona_vectors/v_progressive_layer36.npy",
+  "v_norm": 1.9972,
+  "alpha_plain": 2.0,
+  "alpha_strong": 3.0,
+  "alpha_status": "FIXED at α_plain=2.0 (α_strong=1.5·α_plain=3.0) by JADE 2026-05-28 under time pressure, BYPASSING the sweep. Risk acknowledged: (a) boundary α (lowest non-zero in the sweep set {0.0,1.0,2.0,3.0,4.0,6.0}); (b) the conservative-split (김문수 vs 이준석) is unverified at this α — smoke (n=25) showed 60/40 이재명/김문수 with 0% 이준석, but sample too small to detect persona-driven split. Prior smoke at α=2.0: parse_rate=1.0, vote_consistency=1.0. Selection rule deferred: re-validate post-hoc if T4.3 pilot shows orientation collapse or 이준석=0%.",
+  "trait_validation": {
+    "prompts_pass": "50/50",
+    "mean_sep_보수axis": 3.304,
+    "mean_sep_진보axis": 3.428
+  }
+}

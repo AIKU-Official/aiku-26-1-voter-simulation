@@ -1,0 +1,5 @@
+candidate_no,name_ko,path,char_count,max_chars_ok,themes_present,emphasis_count,sha256,modified_at,status
+1,이재명,candidates/policy_summaries/1_이재명.txt,4977,true,경제|안보|복지|외교|정치,6,7d2959b728985db11eac46e621eef2f23cf0b04694bb9c54cd973a7a7a811a44,2026-05-07T10:33:56.721178+00:00,ok
+2,김문수,candidates/policy_summaries/2_김문수.txt,4241,true,경제|안보|복지|외교|정치,72,d1e5c8a4ece3b821c8976ed9b90a4375980454ab58df2df981875dfe662b2c3d,2026-05-07T10:33:56.849172+00:00,ok
+4,이준석,candidates/policy_summaries/4_이준석.txt,3019,true,경제|안보|복지|외교,54,7cc631100747fdfdfd8fd836695d3add70131b2a0565ae0271cde2510c4413fe,2026-05-07T10:33:56.965167+00:00,ok
+5,권영국,candidates/policy_summaries/5_권영국.txt,4922,true,경제|복지|외교|정치,76,f32462ec7ac598ddf075153639b113f4799075eafaf35ce4b2ed64e323178b88,2026-05-07T10:33:57.069163+00:00,ok

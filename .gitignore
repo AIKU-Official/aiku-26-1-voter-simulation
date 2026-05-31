@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+
+# Large datasets — out of scope for submission
+data/kgss/*.sav
+data/kgss/*.pkl
+data/nemotron/
+
+# Reference PDFs and high-granularity tables not used at runtime
+data/kgss/*.pdf
+data/ground_truth/nec_official_polling_station.csv
+
+# Generated logs
+logs/
+*.log
+
+# Internal documentation (excluded from submission)
+prompts/system_prompts/cell_templates/all_cells.md
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Local config overrides
+*.local.yaml

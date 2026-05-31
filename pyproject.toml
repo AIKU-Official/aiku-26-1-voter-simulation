@@ -1,0 +1,45 @@
+[project]
+name = "korean-voter-llm-validation"
+version = "0.1.0"
+description = "Persona-conditioned LLM voting simulation for the 21st Korean presidential election (2025-06-03): Persona Vector + Belief Network Seeding under a name-exposed ballot."
+requires-python = ">=3.11"
+dependencies = [
+    # Model / inference (HuggingFace backend for PV phases)
+    "torch==2.4.1+cu121",
+    "transformers>=4.51,<5",
+    "accelerate>=0.34",
+    "safetensors>=0.4",
+    "anthropic>=0.40",          # Claude API LLM-judges (narrative, trait, causal, coherence, voice)
+    # KGSS / statistics (EFA + factor sampling)
+    "pyreadstat>=1.2",          # read KGSS .sav (SPSS)
+    "pandas>=2.2",
+    "numpy>=1.26",
+    "scipy>=1.13",
+    "scikit-learn>=1.5,<1.6",  # factor-analyzer 0.5.1 calls check_array(force_all_finite=...), removed in sklearn 1.8
+    "factor-analyzer>=0.5",
+    # Eval / outputs
+    "matplotlib>=3.9",
+    "seaborn>=0.13",
+    "geopandas>=1.0",           # sido choropleth
+    # Utilities
+    "pyarrow>=17",
+    "pyyaml>=6",
+    "tqdm>=4.66",
+]
+
+# NOTE on vLLM (Phase 4 main inference): vllm>=0.7 requires torch>=2.5.1, which is
+# incompatible with the cu121-pinned torch==2.4.1 the PV/HF phases run on. It is
+# therefore NOT a dependency of this project. Install vLLM in a SEPARATE venv for
+# Phase 4 (e.g. `uv venv .venv-vllm && .venv-vllm/bin/pip install vllm`), serve the
+# model there, and drive it over HTTP. See specs/operational_setup.md.
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu121" }
+
+[[tool.uv.index]]
+name = "pytorch-cu121"
+url = "https://download.pytorch.org/whl/cu121"
+explicit = true

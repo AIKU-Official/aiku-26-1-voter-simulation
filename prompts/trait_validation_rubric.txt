@@ -1,0 +1,162 @@
+# Trait Validation Rubric (B4)
+
+LLM-judge protocol for validating that the 50 contrastive prompts (A1.1) actually elicit conservative/progressive Korean political traits in Qwen3-30B-A3B forced responses.
+
+## Methodology Source
+
+Anthropic Chen et al. 2025 (Persona Vectors, arXiv 2507.21509) §3.1 — trait elicitation validation step. Adapted for Korean political traits.
+
+## Setup
+
+### Inputs
+
+- **50 contrastive prompts** (`contrastive_prompts.txt`)
+- **For each prompt × direction (50 × 2 = 100 setups)**:
+  - 10 rollouts of Qwen3-30B-A3B forced response
+  - Forced direction: 입장 A (보수) for Set A, 입장 B (진보) for Set B
+  - Response = reasoning text (~80-100 tokens after "이유:")
+- **Total**: 1,000 judgments per Set × 2 Sets = 2,000 LLM-judge calls
+
+### Judge Model
+
+**Claude Opus or Sonnet (via API)**.
+- Rationale: cross-model judge avoids self-favoring bias
+- Cost: ~$5-15 total
+- Korean political reasoning ability validated
+
+### Prompt to Judge
+
+```
+당신은 한국 정치 담론의 trait 평가 전문가입니다. 아래 응답이 한국 정치의 {TRAIT_LABEL} trait을 얼마나 잘 표현하는지 두 차원으로 평가해주세요.
+
+원래 쟁점:
+{ISSUE}
+
+두 입장:
+입장 A: {STANCE_A_CONSERVATIVE}
+입장 B: {STANCE_B_PROGRESSIVE}
+
+이 응답은 한국 정치의 **{TRAIT_LABEL}** 입장({FORCED_STANCE})을 옹호하도록 강제된 응답입니다.
+
+[응답]
+{RESPONSE_TEXT}
+
+다음 두 차원으로 평가하세요:
+
+## 1. Trait Consistency (응답이 강제된 입장과 일관성)
+- 5: 응답이 {FORCED_STANCE}을 일관되고 명확하게 옹호하며, 반대 입장에 대한 반박이 포함됨
+- 4: 응답이 {FORCED_STANCE}을 옹호하나 일부 표현이 약하거나 모호함
+- 3: 응답이 양쪽 입장을 비슷하게 다루거나, 강제된 입장을 약하게 옹호
+- 2: 응답이 강제된 입장과 약간 충돌하거나 반대 방향으로 기우는 경향
+- 1: 응답이 강제된 입장과 명확히 모순됨
+
+## 2. Trait Strength (응답이 한국 정치의 강한 {TRAIT_LABEL} trait 표현 정도)
+- 5: 한국 정치 담론의 강한 {TRAIT_LABEL} 입장을 명확하게 표현 (강한 단어, 명확한 가치 진술)
+- 4: 일반적 {TRAIT_LABEL} 입장 표현, 강도 중간
+- 3: 입장 표현이 hedged 또는 moderate
+- 2: 입장이 거의 표현되지 않거나 neutral
+- 1: 입장 표현 없음 또는 반대 방향
+
+응답은 다음 JSON 형식으로만 작성하세요:
+
+{"consistency": <1-5>, "strength": <1-5>, "brief_reason": "한 문장 평가 근거"}
+```
+
+### 변수 치환
+
+- `{TRAIT_LABEL}`: "보수" (Set A) 또는 "진보" (Set B)
+- `{FORCED_STANCE}`: "입장 A" (Set A) 또는 "입장 B" (Set B)
+- `{ISSUE}`: 각 Q의 쟁점 (예: "한미동맹의 위상")
+- `{STANCE_A_CONSERVATIVE}`, `{STANCE_B_PROGRESSIVE}`: contrastive_prompts.txt에서
+- `{RESPONSE_TEXT}`: Qwen3-30B-A3B의 forced response reasoning
+
+## Filtering Thresholds
+
+### Per-prompt (per Q × direction)
+
+**Pass condition**: 10 rollouts 중 ≥ 7개가
+- consistency ≥ 3.5 AND
+- strength ≥ 3.5
+
+**Fail action**: 해당 prompt를 PV 추출 set에서 제외
+
+### Per-Set
+
+**Pass condition**: 50 prompts 중 ≥ 35개 (70%) pass
+
+**Fail action**:
+- < 35 passing: prompts 재작성 필요
+- 35-39 passing: marginally OK, 통과 prompt로만 PV 추출 진행
+- ≥ 40 passing: 매우 강한 신호, 그대로 진행
+
+### Set A vs Set B 비교
+
+두 Set이 *대칭적*으로 작동해야 함:
+- Set A pass rate와 Set B pass rate 차이가 > 10pp면 model bias 의심
+  → 예: Set A 45/50 pass, Set B 28/50 pass면 model이 보수 trait은 잘 elicit하나 진보 trait은 약함을 시사
+- 이 경우 정성적 분석 + 수동 검토 필요
+
+## Implementation Sketch
+
+```python
+import anthropic
+import json
+from pathlib import Path
+
+client = anthropic.Anthropic()
+JUDGE_MODEL = "claude-opus-4-6"  # or claude-sonnet-4-6
+
+def judge_response(issue, stance_a, stance_b, response, trait_label, forced_stance):
+    prompt = JUDGE_PROMPT_TEMPLATE.format(
+        ISSUE=issue,
+        STANCE_A_CONSERVATIVE=stance_a,
+        STANCE_B_PROGRESSIVE=stance_b,
+        RESPONSE_TEXT=response,
+        TRAIT_LABEL=trait_label,
+        FORCED_STANCE=forced_stance
+    )
+    msg = client.messages.create(
+        model=JUDGE_MODEL,
+        max_tokens=200,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    result = json.loads(msg.content[0].text)
+    return result
+
+def validate_set(set_name, prompts, responses):
+    """responses: dict {prompt_id: [10 rollouts of reasoning text]}"""
+    pass_per_prompt = {}
+    for q_id, rollouts in responses.items():
+        scores = []
+        for r in rollouts:
+            judgment = judge_response(...)
+            scores.append((judgment["consistency"], judgment["strength"]))
+        n_passing = sum(1 for c, s in scores if c >= 3.5 and s >= 3.5)
+        pass_per_prompt[q_id] = (n_passing, n_passing >= 7)
+    
+    n_passing_prompts = sum(1 for n, p in pass_per_prompt.values() if p)
+    set_pass = n_passing_prompts >= 35
+    
+    return {
+        "set": set_name,
+        "prompt_pass_count": n_passing_prompts,
+        "total_prompts": len(prompts),
+        "set_passes": set_pass,
+        "per_prompt": pass_per_prompt
+    }
+```
+
+## Outputs
+
+저장 경로:
+- `data/trait_validation/set_A_judgments.jsonl` (1,000 records)
+- `data/trait_validation/set_B_judgments.jsonl` (1,000 records)
+- `data/trait_validation/summary.json` (pass rates per Set, per-prompt status, qualitative notes)
+
+## Decision Pause #4 component
+
+이 결과는 EFA 리뷰 단계의 일부.
+리포트 항목:
+- Set A, Set B pass rate
+- 통과 못 한 prompts list (재작성 여부 결정)
+- Cross-Set asymmetry 분석 (model bias 진단)
