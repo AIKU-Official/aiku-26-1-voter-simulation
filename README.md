@@ -260,7 +260,8 @@ uv run python scripts/generate_case_studies.py
 
 <img width="844" height="730" alt="image" src="https://github.com/user-attachments/assets/cd0d6020-c974-4f7e-9845-bebccccaa025" />
 
-<img width="547" height="176" alt="image" src="https://github.com/user-attachments/assets/0f7631eb-643a-4a2d-a85b-d6549fc9bd48" />
+<img width="866" height="303" alt="image" src="https://github.com/user-attachments/assets/8f85155d-81d2-4034-bbf5-ea132799f29d" />
+
 
 
 
