@@ -90,6 +90,8 @@ p_{g,c}
 
 후보자 이름, 정책 설명, 정당 정보를 단계적으로 제거하는 diagnostic anonymization experiment를 수행합니다. 이를 통해 candidate-related information이 model output과 persona-following behavior에 미치는 영향을 분석합니다.
 
+본 프로젝트에 대한 더 자세한 설명은 [AIKU 노션](https://www.notion.so/Korean-Voter-Simulation-387a7930e09c80379a84db7f777f6a19?source=copy_link)에서 확인하실 수 있습니다.
+
 
 ## 환경 설정
 
@@ -267,5 +269,6 @@ uv run python scripts/generate_case_studies.py
 
 ## 팀원
 
+* [강동혁](https://github.com/cucumber5252): 연구 목표 수립, 방법론 설계, Paper 작성
 * [마현우](https://github.com/ruaqktk): 연구 목표 수립, 방법론 설계, 관련 연구 조사, 실험 수행
 * [이성은](https://github.com/lse072222): 연구 목표 수립, 방법론 설계, 결과 분석
